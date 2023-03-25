@@ -1,6 +1,8 @@
-
+using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
+#if UNITY_EDITOR
 using Leopotam.Ecs.UnityIntegration;
+#endif
 using UnityEngine;
 using Voody.UniLeo;
 
@@ -10,7 +12,7 @@ namespace CrazyHammer.Core
     {
         private EcsWorld _world;
         private EcsSystems _systems;
-        
+
         private void Start()
         {
             _world = new EcsWorld();
@@ -22,7 +24,7 @@ namespace CrazyHammer.Core
             _systems = new EcsSystems(_world);
 
             _systems.ConvertScene();
-            
+
             AddInjections();
             AddOneFrames();
             AddSystems();
@@ -37,17 +39,19 @@ namespace CrazyHammer.Core
 
         private void AddSystems()
         {
-            
+            _systems
+                .Add(new EnableGameFieldInputSystem())
+                .Add(new CreateAndDeleteGameTouchesSystem())
+                .Add(new UpdateGameTouchesPositionSystem())
+                .Add(new GameTouchScreenSideSetSystem());
         }
 
         private void AddInjections()
         {
-            
         }
         
         private void AddOneFrames()
         {
-            
         }
 
         private void OnDestroy()
