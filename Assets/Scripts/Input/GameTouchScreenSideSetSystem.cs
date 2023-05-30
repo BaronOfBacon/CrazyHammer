@@ -20,7 +20,7 @@ namespace CrazyHammer.Core.Input
                 if (_leftTouches.IsEmpty())
                 {
                     var startScreenPosition = _newGameTouches.Get1(index).StartScreenPosition;
-                    if (startScreenPosition.x < Screen.width / 2f)
+                    if (startScreenPosition.x <= Screen.width / 2f)
                     {
                         entity.Get<LeftScreenSideTouchComponent>();
                     }

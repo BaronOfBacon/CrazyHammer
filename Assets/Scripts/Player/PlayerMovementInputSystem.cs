@@ -4,7 +4,7 @@ namespace CrazyHammer.Core
 {
     public class PlayerMovementInputSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly EcsFilter<MovementComponent, MovementControllableTag> _movables = null;
+        private readonly EcsFilter<MovableComponent, PlayerTag> _movables = null;
         
 
         public void Init()

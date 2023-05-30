@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 
 namespace CrazyHammer.Core
 {
-    internal struct MovementComponent
+    [Serializable]
+    public struct MovableComponent
     {
         public Vector3 SpawnPosition;
         public Vector3 Movement;

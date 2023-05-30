@@ -8,7 +8,7 @@ namespace CrazyHammer.Core.Input
 
         public void Init()
         {
-            _world.NewEntity().Get<ProcessGameFieldInputComponent>();
+            _world.NewEntity().Get<GameIsRunningFlag>();
         }
     }
 }

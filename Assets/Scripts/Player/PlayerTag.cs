@@ -1,6 +1,6 @@
 namespace CrazyHammer.Core
 {
-    internal struct MovementControllableTag
+    public struct PlayerTag
     {
     
     }

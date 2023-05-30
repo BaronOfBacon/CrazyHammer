@@ -1,3 +1,4 @@
+using System.Linq;
 using Leopotam.Ecs;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -5,13 +6,12 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace CrazyHammer.Core.Input
 {
-    public class CreateAndDeleteGameTouchesSystem : IEcsPreInitSystem, IEcsDestroySystem
+    public class CUDGameTouchesSystem : IEcsPreInitSystem, IEcsRunSystem, IEcsDestroySystem
     {
         private readonly EcsWorld _world = null;
+        private readonly EcsFilter<GameTouchComponent>.Exclude<MouseTouchComponent> _gameTouches = null;
+        private readonly EcsFilter<GameIsRunningFlag> _gameIsRunning;
         
-        private readonly EcsFilter<GameTouchComponent> _gameTouches = null;
-
-
         public void PreInit()
         {
             EnhancedTouchSupport.Enable();
@@ -19,15 +19,16 @@ namespace CrazyHammer.Core.Input
             Touch.onFingerUp += DeleteTouch;
         }
 
-        public void Destroy()
+        public void Run()
         {
-            Touch.onFingerDown -= CreateTouch;
-            Touch.onFingerUp -= DeleteTouch;
-            EnhancedTouchSupport.Disable();
+            if (Touch.activeTouches.Count > 0)
+                UpdateTouches();
         }
 
         private void CreateTouch(Finger finger)
         {
+            if (_gameIsRunning.IsEmpty()) return;
+            
             foreach (var index in _gameTouches)
             {
                 if (_gameTouches.Get1(index).ID == finger.index)
@@ -43,6 +44,19 @@ namespace CrazyHammer.Core.Input
             newTouch.ScreenPosition = finger.currentTouch.startScreenPosition;
             entity.Get<NewGameTouchComponent>();
         }
+        
+        private void UpdateTouches()
+        {
+            if (_gameIsRunning.IsEmpty()) return;
+            
+            foreach (var index in _gameTouches)
+            {
+                ref var gameTouch = ref _gameTouches.Get1(index);
+                var fingerID = gameTouch.ID;
+                var finger = Touch.activeFingers.First(finger => finger.index == fingerID);
+                gameTouch.ScreenPosition = finger.currentTouch.screenPosition;
+            } 
+        }
 
         private void DeleteTouch(Finger finger)
         {
@@ -52,6 +66,13 @@ namespace CrazyHammer.Core.Input
                     continue;
                 _gameTouches.GetEntity(index).Destroy();
             }
+        }
+
+        public void Destroy()
+        {
+            Touch.onFingerDown -= CreateTouch;
+            Touch.onFingerUp -= DeleteTouch;
+            EnhancedTouchSupport.Disable();
         }
     }
 }

@@ -1,5 +1,8 @@
+using System;
+using CrazyHammer.Core.Data;
 using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
+using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using Leopotam.Ecs.UnityIntegration;
 #endif
@@ -8,10 +11,15 @@ using Voody.UniLeo;
 
 namespace CrazyHammer.Core
 {
-    public class ECSGameStartup : MonoBehaviour
+    public class ECSGameStartup : SerializedMonoBehaviour
     {
+        [SerializeField, ShowInInspector] 
+        private GameSettings _gameSettings;
+        
         private EcsWorld _world;
         private EcsSystems _systems;
+        private EcsSystems _fixedUpdateSystems;
+
 
         private void Start()
         {
@@ -22,14 +30,17 @@ namespace CrazyHammer.Core
             #endif
             
             _systems = new EcsSystems(_world);
-
+            _fixedUpdateSystems = new EcsSystems(_world);
+            
             _systems.ConvertScene();
+            _fixedUpdateSystems.ConvertScene();
 
             AddInjections();
             AddOneFrames();
             AddSystems();
             
             _systems.Init();
+            _fixedUpdateSystems.Init();
         }
 
         private void Update()
@@ -37,17 +48,30 @@ namespace CrazyHammer.Core
             _systems.Run();
         }
 
+        private void FixedUpdate()
+        {
+            _fixedUpdateSystems.Run();
+        }
+
         private void AddSystems()
         {
             _systems
                 .Add(new EnableGameFieldInputSystem())
-                .Add(new CreateAndDeleteGameTouchesSystem())
-                .Add(new UpdateGameTouchesPositionSystem())
-                .Add(new GameTouchScreenSideSetSystem());
+                .Add(new CUDGameTouchesSystem())
+                #if UNITY_EDITOR
+                //inspector debug
+                .Add(new CUDMouseGameTouchesSystem())
+                #endif
+                .Add(new GameTouchScreenSideSetSystem())
+                .Add(new PlayerMovementInputApplySystem());
+            
+            _fixedUpdateSystems
+                .Add(new MovementSystem());
         }
 
         private void AddInjections()
         {
+            _systems.Inject(_gameSettings);
         }
         
         private void AddOneFrames()
