@@ -7,7 +7,13 @@ namespace CrazyHammer.Core.Data
     [Serializable, CreateAssetMenu(menuName = "Data/Game settings", fileName = "GameSettings")]
     public class GameSettings : SerializedScriptableObject
     {
-        [Range(0.1f, 2f)]
-        public readonly float MovementSensitivity;
+        [Range(0.1f, 2f)] 
+        public float MovementSensitivity;
+        public AnimationCurve playerMoveSensitivity;
+
+        [Space] 
+        
+        [Title("Test"), ShowInInspector] 
+        public SpotSide playerFakeInitSide;
     }
 }

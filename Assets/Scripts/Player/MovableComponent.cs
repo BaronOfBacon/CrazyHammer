@@ -9,6 +9,7 @@ namespace CrazyHammer.Core
         public Vector3 SpawnPosition;
         public Vector3 Movement;
         public Vector3 ForwardDirection;
+        public Vector3 UpDirection;
         public float MovementMultiplier;
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using CrazyHammer.Core.Data;
 using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
@@ -20,7 +19,6 @@ namespace CrazyHammer.Core
         private EcsSystems _systems;
         private EcsSystems _fixedUpdateSystems;
 
-
         private void Start()
         {
             _world = new EcsWorld();
@@ -33,8 +31,7 @@ namespace CrazyHammer.Core
             _fixedUpdateSystems = new EcsSystems(_world);
             
             _systems.ConvertScene();
-            _fixedUpdateSystems.ConvertScene();
-
+            
             AddInjections();
             AddOneFrames();
             AddSystems();
@@ -63,15 +60,19 @@ namespace CrazyHammer.Core
                 .Add(new CUDMouseGameTouchesSystem())
                 #endif
                 .Add(new GameTouchScreenSideSetSystem())
-                .Add(new PlayerMovementInputApplySystem());
+                //TODO change it to players with guids
+                .Add(new FakeAssignCharactersToSpotsSystem())
+                .Add(new CharacterSpotInitSetupSystem());
             
             _fixedUpdateSystems
-                .Add(new MovementSystem());
+                .Add(new MovementSystem())
+                .Add(new RotationSystem());
         }
 
         private void AddInjections()
         {
             _systems.Inject(_gameSettings);
+            _fixedUpdateSystems.Inject(_gameSettings);
         }
         
         private void AddOneFrames()
