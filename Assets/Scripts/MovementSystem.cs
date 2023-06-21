@@ -13,12 +13,8 @@ namespace CrazyHammer.Core
             {
                 ref var movableTransform = ref _movables.Get1(index).Transform;
                 ref var movableComponent = ref _movables.Get2(index);
-
-                var movementOffset = Vector3.Dot(movableComponent.ForwardDirection, movableComponent.Movement)
-                    * movableComponent.ForwardDirection;
-                var desiredPosition = movableComponent.SpawnPosition + movementOffset * 0.1f;
-
-                movableTransform.position = desiredPosition;
+               
+                movableTransform.position = movableComponent.Position;
             }
         }
     }

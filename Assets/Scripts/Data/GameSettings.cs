@@ -9,8 +9,8 @@ namespace CrazyHammer.Core.Data
     {
         [Range(0.1f, 2f)] 
         public float MovementSensitivity;
-        public AnimationCurve playerMoveSensitivity;
-
+        public AnimationCurve PlayerMoveSensitivity;
+        public float TouchSensitivity;
         [Space] 
         
         [Title("Test"), ShowInInspector] 

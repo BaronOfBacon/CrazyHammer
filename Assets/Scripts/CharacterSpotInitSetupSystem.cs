@@ -1,6 +1,5 @@
 using Leopotam.Ecs;
 using UnityEngine;
-using UnityEngine.Splines;
 
 namespace CrazyHammer.Core
 {
@@ -12,34 +11,18 @@ namespace CrazyHammer.Core
         {
             foreach (var index in _filter)
             {
-                var spot = _filter.Get1Ref(index);
-
-                if (spot.Unref().CharacterEntity.IsNull()) continue;
+                ref var spot = ref _filter.Get1(index);
                 
-                ref var movableComponent = ref spot.Unref().CharacterEntity.Get<MovableComponent>();
-                ref var movementSplineContainer = ref spot.Unref().MovementSpline;
+                spot.CurrentPosition = 0f;
                 
-                var initMovableParams = CalculateInitParams(0, movementSplineContainer);
+                if (spot.CharacterEntity.IsNull()) continue;
                 
-                movableComponent.SpawnPosition = initMovableParams.SpawnPosition;
-                movableComponent.Movement = Vector3.zero;
-
-                movableComponent.ForwardDirection = initMovableParams.ForwardDirection;
-                movableComponent.UpDirection = initMovableParams.UpDirection;
+                ref var movableComponent = ref spot.CharacterEntity.Get<MovableComponent>();
+                ref var movementSplineContainer = ref spot.MovementSpline;
+                
+                movableComponent = MovableComponent.CalculateParams(0, movementSplineContainer);
+                
             }
-        }
-        
-        MovableComponent CalculateInitParams(float relativePoint, SplineContainer container)
-        {
-            var initMovableParams = new MovableComponent();
-                
-            var splineRelativePosition = container.Spline.EvaluatePosition(relativePoint);
-            initMovableParams.SpawnPosition = container.transform.TransformPoint(splineRelativePosition);
-
-            initMovableParams.ForwardDirection = container.transform.TransformDirection(container.Spline.EvaluateTangent(relativePoint)); 
-            initMovableParams.UpDirection = container.transform.TransformDirection(container.Spline.EvaluateUpVector(relativePoint));
-
-            return initMovableParams;
         }
     }
 }

@@ -56,7 +56,7 @@ namespace CrazyHammer.Core
                 .Add(new EnableGameFieldInputSystem())
                 .Add(new CUDGameTouchesSystem())
                 #if UNITY_EDITOR
-                //inspector debug
+                //inspector/debug
                 .Add(new CUDMouseGameTouchesSystem())
                 #endif
                 .Add(new GameTouchScreenSideSetSystem())
@@ -66,7 +66,8 @@ namespace CrazyHammer.Core
             
             _fixedUpdateSystems
                 .Add(new MovementSystem())
-                .Add(new RotationSystem());
+                .Add(new RotationSystem())
+                .Add(new PlayerMovementInputApplySystem1());
         }
 
         private void AddInjections()
