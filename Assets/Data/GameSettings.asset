@@ -21,12 +21,12 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  MovementSensitivity: 0.1
+  MovementSensitivity: 0.35
   PlayerMoveSensitivity:
     serializedVersion: 2
     m_Curve: []
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  TouchSensitivity: 0.001
+  TouchSensitivity: 1
   playerFakeInitSide: 0

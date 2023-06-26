@@ -1,40 +1,49 @@
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.InputSystem;
 
 namespace CrazyHammer.Core
 {
     public class Test : MonoBehaviour
     {
-        public SplineContainer splineContainer;
-        
-        private float splineLength;
+        [SerializeField] private GameObject _player;
+        [SerializeField] private float _maxHandsDistance = 4f;
+        [SerializeField] private float _movementSensitivity = 0.01f;
+        [SerializeField] private float _mass = 1f;
+        [SerializeField] public float lerpSpeed = 8.0f;
 
-        public GameObject testGO;
-        
-        [Range(0f,1f), SerializeField]
-        private float relativePosition;
-        
-        private void Start()
-        {
-            splineLength = splineContainer.Spline.GetLength();
-        }
+        private Vector3 _mouseStartPosition;
+        private Vector3 _handsInitialPosition;
+        private bool _pressed;
+        private Vector3 _velocity = Vector3.zero;
 
         private void Update()
         {
-            var relativePoint = splineLength * relativePosition / splineLength;
+            if (!Mouse.current.leftButton.isPressed)
+            {
+                if (_pressed)
+                    _pressed = false;
+                return;
+            }
+
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                _pressed = true;
+                _mouseStartPosition = Mouse.current.position.ReadValue();
+                _handsInitialPosition = transform.position;
+            }
+
+            var mousePositionOffset = _mouseStartPosition - (Vector3)Mouse.current.position.ReadValue();
+            mousePositionOffset *= _movementSensitivity;
+
+            var calculatedHandsPosition = _handsInitialPosition - mousePositionOffset;
+
+            var offset = Vector3.ClampMagnitude(calculatedHandsPosition - _player.transform.position, _maxHandsDistance);
+            var targetPosition = _player.transform.position + offset;
             
-            var position = splineContainer.Spline.EvaluatePosition(relativePoint);
-            position = splineContainer.transform.TransformPoint(position);
-            
-            var forwardDirection = splineContainer.Spline.EvaluateTangent(relativePoint);
-            forwardDirection = splineContainer.transform.TransformDirection(forwardDirection);
-            
-            var upDirection = splineContainer.Spline.EvaluateUpVector(relativePoint);
-            upDirection = splineContainer.transform.TransformDirection(upDirection);
-            
-            testGO.transform.position = (Vector3)position;
-            testGO.transform.up = upDirection;
-            testGO.transform.forward = forwardDirection;
+            float smoothDampTime = Mathf.Sqrt(_mass);
+
+            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _velocity, smoothDampTime, Mathf.Infinity, Time.deltaTime * lerpSpeed);
         }
+
     }
 }

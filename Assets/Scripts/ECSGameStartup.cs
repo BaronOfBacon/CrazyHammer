@@ -67,7 +67,8 @@ namespace CrazyHammer.Core
             _fixedUpdateSystems
                 .Add(new MovementSystem())
                 .Add(new RotationSystem())
-                .Add(new PlayerMovementInputApplySystem1());
+                .Add(new PlayerMovementInputApplySystem())
+                .Add(new PlayerHandsInputApplySystem());
         }
 
         private void AddInjections()
