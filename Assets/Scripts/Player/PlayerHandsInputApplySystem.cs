@@ -1,4 +1,3 @@
-using CrazyHammer.Core.Data;
 using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
 using UnityEngine;
@@ -7,8 +6,6 @@ namespace CrazyHammer.Core
 {
     public class PlayerHandsInputApplySystem : IEcsRunSystem
     {
-        private GameSettings _gameSettings = null;
-
         private readonly EcsFilter<CharacterSpot> _characterSpot = null;
         private readonly EcsFilter<LeftScreenSideTouchComponent> _leftTouchFilter = null;
         private readonly EcsFilter<RightScreenSideTouchComponent> _rightTouchFilter = null;
@@ -17,7 +14,6 @@ namespace CrazyHammer.Core
         {
             foreach (var index in _characterSpot)
             {
-                
                 ref var spot = ref _characterSpot.Get1(index);
 
                 if (spot.CharacterEntity.IsNull() || !spot.CharacterEntity.Has<PlayerTag>()) continue;
@@ -39,6 +35,7 @@ namespace CrazyHammer.Core
                         continue;
                 }
                 
+                ref var characterComponent = ref spot.CharacterEntity.Get<CharacterComponent>();
                 ref var handsComponent = ref spot.CharacterEntity.Get<HandsComponent>();
                 
                 if (touchEntity.Has<NewGameTouchComponent>())
@@ -49,18 +46,18 @@ namespace CrazyHammer.Core
                 }
                 
                 Vector3 touchOffset = gameTouch.ScreenPosition - gameTouch.StartScreenPosition;
-                touchOffset *= _gameSettings.HandsSettings.Sensitivity * Time.fixedDeltaTime;
+                touchOffset *= characterComponent.Settings.HandsSettings.Sensitivity * Time.fixedDeltaTime;
 
                 var localPositionWithTouchOffset = handsComponent.InitialLocalPosition + touchOffset;
-                localPositionWithTouchOffset = Vector3.ClampMagnitude(localPositionWithTouchOffset, _gameSettings.HandsSettings.MaxHandsDistance);
+                localPositionWithTouchOffset = Vector3.ClampMagnitude(localPositionWithTouchOffset, characterComponent.Settings.HandsSettings.MaxHandsDistance);
                 
                 var targetPosition = handsComponent.RootTransform.position + localPositionWithTouchOffset;
-                float smoothDampTime = Mathf.Sqrt(_gameSettings.HandsSettings.Mass);
+                float smoothDampTime = Mathf.Sqrt(characterComponent.Settings.HandsSettings.Mass);
                 var current = handsComponent.DesiredPositionTransform.position;
 
                 handsComponent.DesiredPositionTransform.position = Vector3.SmoothDamp(current, targetPosition, 
                     ref handsComponent.Velocity, smoothDampTime, Mathf.Infinity, 
-                    _gameSettings.HandsSettings.LerpSpeed);
+                    characterComponent.Settings.HandsSettings.LerpSpeed);
             }
         }
     }
