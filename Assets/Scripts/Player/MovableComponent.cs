@@ -10,6 +10,7 @@ namespace CrazyHammer.Core
         public Vector3 Position;
         public Vector3 ForwardDirection;
         public Vector3 UpDirection;
+        public float Velocity;
 
         public static MovableComponent CalculateParams(float relativePoint, SplineContainer container)
         {

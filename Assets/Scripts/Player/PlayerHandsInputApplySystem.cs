@@ -8,7 +8,7 @@ namespace CrazyHammer.Core
     public class PlayerHandsInputApplySystem : IEcsRunSystem
     {
         private GameSettings _gameSettings = null;
-        
+
         private readonly EcsFilter<CharacterSpot> _characterSpot = null;
         private readonly EcsFilter<LeftScreenSideTouchComponent> _leftTouchFilter = null;
         private readonly EcsFilter<RightScreenSideTouchComponent> _rightTouchFilter = null;
@@ -22,8 +22,8 @@ namespace CrazyHammer.Core
 
                 if (spot.CharacterEntity.IsNull() || !spot.CharacterEntity.Has<PlayerTag>()) continue;
 
-                GameTouchComponent gameTouch;
                 EcsEntity touchEntity;
+                GameTouchComponent gameTouch;
                 
                 switch (spot.Side)
                 {
@@ -36,28 +36,31 @@ namespace CrazyHammer.Core
                         gameTouch = touchEntity.Get<GameTouchComponent>();
                         break;
                     default:
-                        if (!spot.TouchStartPosition.Equals(spot.CurrentPosition))
-                            spot.TouchStartPosition = spot.CurrentPosition;
                         continue;
                 }
+                
                 ref var handsComponent = ref spot.CharacterEntity.Get<HandsComponent>();
                 
                 if (touchEntity.Has<NewGameTouchComponent>())
                 {
-                    handsComponent.HandsInitialPosition = handsComponent.DesiredPositionTransform.position;
+                    handsComponent.InitialLocalPosition = handsComponent.DesiredPositionTransform.position 
+                                                          - handsComponent.RootTransform.position;
+                    handsComponent.Velocity = Vector3.zero;
                 }
                 
-                var touchPositionOffset = gameTouch.StartScreenPosition - gameTouch.ScreenPosition;
-                touchPositionOffset *= _gameSettings.HandsSettings.MovementSensitivity;
+                Vector3 touchOffset = gameTouch.ScreenPosition - gameTouch.StartScreenPosition;
+                touchOffset *= _gameSettings.HandsSettings.Sensitivity * Time.fixedDeltaTime;
 
-                var calculatedHandsPosition = handsComponent.HandsInitialPosition - (Vector3)touchPositionOffset;
-
-                var offset = Vector3.ClampMagnitude(calculatedHandsPosition - handsComponent.RootTransform.position, _gameSettings.HandsSettings.MaxHandsDistance);
-                var targetPosition = handsComponent.RootTransform.position + offset;
-            
+                var localPositionWithTouchOffset = handsComponent.InitialLocalPosition + touchOffset;
+                localPositionWithTouchOffset = Vector3.ClampMagnitude(localPositionWithTouchOffset, _gameSettings.HandsSettings.MaxHandsDistance);
+                
+                var targetPosition = handsComponent.RootTransform.position + localPositionWithTouchOffset;
                 float smoothDampTime = Mathf.Sqrt(_gameSettings.HandsSettings.Mass);
+                var current = handsComponent.DesiredPositionTransform.position;
 
-                handsComponent.DesiredPositionTransform.position = Vector3.SmoothDamp(handsComponent.DesiredPositionTransform.position, targetPosition, ref handsComponent.Velocity, smoothDampTime, Mathf.Infinity, Time.deltaTime * _gameSettings.HandsSettings.LerpSpeed);
+                handsComponent.DesiredPositionTransform.position = Vector3.SmoothDamp(current, targetPosition, 
+                    ref handsComponent.Velocity, smoothDampTime, Mathf.Infinity, 
+                    _gameSettings.HandsSettings.LerpSpeed);
             }
         }
     }

@@ -2,6 +2,7 @@ using CrazyHammer.Core.Data;
 using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 #if UNITY_EDITOR
 using Leopotam.Ecs.UnityIntegration;
 #endif
@@ -12,12 +13,20 @@ namespace CrazyHammer.Core
 {
     public class ECSGameStartup : SerializedMonoBehaviour
     {
-        [SerializeField, ShowInInspector] 
+        [OdinSerialize] 
         private GameSettings _gameSettings;
-        
+
         private EcsWorld _world;
         private EcsSystems _systems;
         private EcsSystems _fixedUpdateSystems;
+        private Vector2 _screenBasedTouchScaleRatio;
+
+        private void Awake()
+        {
+            Application.targetFrameRate = 60;
+            _screenBasedTouchScaleRatio.x = (float)Screen.width / _gameSettings.TargetScreenRatio.x;
+            _screenBasedTouchScaleRatio.y = (float)Screen.height / _gameSettings.TargetScreenRatio.y;
+        }
 
         private void Start()
         {
@@ -63,7 +72,7 @@ namespace CrazyHammer.Core
                 //TODO change it to players with guids
                 .Add(new FakeAssignCharactersToSpotsSystem())
                 .Add(new CharacterSpotInitSetupSystem());
-            
+
             _fixedUpdateSystems
                 .Add(new MovementSystem())
                 .Add(new RotationSystem())
@@ -74,7 +83,9 @@ namespace CrazyHammer.Core
         private void AddInjections()
         {
             _systems.Inject(_gameSettings);
+            _systems.Inject(_screenBasedTouchScaleRatio);
             _fixedUpdateSystems.Inject(_gameSettings);
+            _fixedUpdateSystems.Inject(_screenBasedTouchScaleRatio);
         }
         
         private void AddOneFrames()

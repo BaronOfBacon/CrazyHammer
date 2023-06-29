@@ -18,7 +18,7 @@ namespace CrazyHammer.Core
             {
                 var spot = _spots.Get1Ref(index);
 
-                if (spot.Unref().Side != _gameSettings.playerFakeInitSide) continue;
+                if (spot.Unref().Side != _gameSettings.PlayerFakeInitSide) continue;
                 
                 spot.Unref().CharacterEntity = playerEntity;
                 return;

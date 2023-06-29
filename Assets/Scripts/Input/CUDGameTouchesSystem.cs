@@ -11,6 +11,7 @@ namespace CrazyHammer.Core.Input
         private readonly EcsWorld _world = null;
         private readonly EcsFilter<GameTouchComponent>.Exclude<MouseTouchComponent> _gameTouches = null;
         private readonly EcsFilter<GameIsRunningFlag> _gameIsRunning;
+        private Vector2 _screenBasedTouchScaleRatio;
         
         public void PreInit()
         {
@@ -40,9 +41,10 @@ namespace CrazyHammer.Core.Input
             var entity = _world.NewEntity();
             ref var newTouch = ref entity.Get<GameTouchComponent>();
             newTouch.ID = finger.index;
-            newTouch.StartScreenPosition = finger.currentTouch.startScreenPosition;
-            newTouch.ScreenPosition = finger.currentTouch.startScreenPosition;
-            entity.Get<NewGameTouchComponent>();
+            newTouch.StartScreenPosition = Vector2.Scale(finger.currentTouch.startScreenPosition, _screenBasedTouchScaleRatio);
+            newTouch.ScreenPosition = Vector2.Scale(finger.currentTouch.startScreenPosition,_screenBasedTouchScaleRatio);
+            ref var newTouchComponent = ref entity.Get<NewGameTouchComponent>();
+            newTouchComponent.ValidTicks = 1;
         }
         
         private void UpdateTouches()
@@ -54,7 +56,7 @@ namespace CrazyHammer.Core.Input
                 ref var gameTouch = ref _gameTouches.Get1(index);
                 var fingerID = gameTouch.ID;
                 var finger = Touch.activeFingers.First(finger => finger.index == fingerID);
-                gameTouch.ScreenPosition = finger.currentTouch.screenPosition;
+                gameTouch.ScreenPosition = Vector2.Scale(finger.currentTouch.screenPosition,_screenBasedTouchScaleRatio);
             } 
         }
 

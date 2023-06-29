@@ -1,3 +1,4 @@
+using CrazyHammer.Core.Data;
 using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
 using UnityEngine.InputSystem;
@@ -9,7 +10,8 @@ namespace CrazyHammer.Core
         private readonly EcsWorld _world = null;
         private readonly EcsFilter<MouseTouchComponent> _mouseTouches = null;
         private readonly EcsFilter<GameIsRunningFlag> _gameIsRunning = null;
-
+        private GameSettings _gameSettings = null;
+        
         public void Run()
         {
             if (Mouse.current.leftButton.wasReleasedThisFrame)
@@ -30,8 +32,9 @@ namespace CrazyHammer.Core
             ref var newTouch = ref entity.Get<GameTouchComponent>();
             newTouch.ID = -1;
             newTouch.StartScreenPosition = Mouse.current.position.ReadValue();
-            newTouch.ScreenPosition = Mouse.current.position.ReadValue();
-            entity.Get<NewGameTouchComponent>();
+            newTouch.ScreenPosition = newTouch.StartScreenPosition;
+            ref var newTouchComponent = ref entity.Get<NewGameTouchComponent>();
+            newTouchComponent.ValidTicks = 1;
             entity.Get<MouseTouchComponent>();
         }
 

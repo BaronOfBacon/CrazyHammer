@@ -1,5 +1,4 @@
 using Leopotam.Ecs;
-using UnityEngine;
 
 namespace CrazyHammer.Core
 {
@@ -21,7 +20,6 @@ namespace CrazyHammer.Core
                 ref var movementSplineContainer = ref spot.MovementSpline;
                 
                 movableComponent = MovableComponent.CalculateParams(0, movementSplineContainer);
-                
             }
         }
     }

@@ -1,5 +1,7 @@
 namespace CrazyHammer.Core.Input
 {
-    internal struct NewGameTouchComponent
-    {}
+    public struct NewGameTouchComponent
+    {
+        public int ValidTicks;
+    }
 }

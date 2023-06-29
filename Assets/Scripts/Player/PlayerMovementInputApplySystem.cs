@@ -21,14 +21,17 @@ namespace CrazyHammer.Core
 
                 if (spot.CharacterEntity.IsNull() || !spot.CharacterEntity.Has<PlayerTag>()) continue;
 
+                EcsEntity touchEntity;
                 GameTouchComponent gameTouch;
                 
                 switch (spot.Side)
                 {
                     case SpotSide.Left when !_leftTouchFilter.IsEmpty():
+                        touchEntity = touchEntity = _leftTouchFilter.GetEntity(0);
                         gameTouch = _leftTouchFilter.GetEntity(0).Get<GameTouchComponent>();
                         break;
                     case SpotSide.Right when !_rightTouchFilter.IsEmpty():
+                        touchEntity = touchEntity = _rightTouchFilter.GetEntity(0);
                         gameTouch = _rightTouchFilter.GetEntity(0).Get<GameTouchComponent>();
                         break;
                     default:
@@ -36,15 +39,31 @@ namespace CrazyHammer.Core
                             spot.TouchStartPosition = spot.CurrentPosition;
                         continue;
                 }
-
-                var deltaTouchPosition = gameTouch.ScreenPosition - gameTouch.StartScreenPosition;
-                var sensitivityTouchPosition = deltaTouchPosition.x * _gameSettings.TouchSensitivity;
-                if (spot.Side == SpotSide.Right)
-                    sensitivityTouchPosition *= -1;
-                spot.CurrentPosition = Mathf.Clamp(spot.TouchStartPosition + sensitivityTouchPosition, 0, 1);
+                
                 ref var movableComponent = ref spot.CharacterEntity.Get<MovableComponent>();
                 
-                movableComponent = MovableComponent.CalculateParams(spot.CurrentPosition, spot.MovementSpline);
+                if (touchEntity.Has<NewGameTouchComponent>())
+                {
+                    movableComponent.Velocity = 0f;
+                }
+
+                var deltaTouchPosition = gameTouch.ScreenPosition - gameTouch.StartScreenPosition;
+                var sensitivityTouchPosition = deltaTouchPosition.x * _gameSettings.BodySettings.Sensitivity 
+                                                                    * Time.fixedDeltaTime;
+                if (spot.Side == SpotSide.Right)
+                    sensitivityTouchPosition *= -1;
+                
+                var previousPosition = spot.CurrentPosition;
+                var targetPosition = Mathf.Clamp(spot.TouchStartPosition + sensitivityTouchPosition, 0, 1);
+                var smoothDampTime = Mathf.Sqrt(_gameSettings.BodySettings.Mass);
+                
+                spot.CurrentPosition = Mathf.SmoothDamp(previousPosition, targetPosition, 
+                    ref movableComponent.Velocity, smoothDampTime, Mathf.Infinity, 
+                    _gameSettings.HandsSettings.LerpSpeed);
+                
+                var calculatedMovableComponent = MovableComponent.CalculateParams(spot.CurrentPosition, spot.MovementSpline);
+                
+                movableComponent = calculatedMovableComponent;
             }
         }
     }

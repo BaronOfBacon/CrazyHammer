@@ -1,5 +1,4 @@
 using Leopotam.Ecs;
-using UnityEngine;
 using Screen = UnityEngine.Device.Screen;
 
 namespace CrazyHammer.Core.Input
@@ -15,7 +14,15 @@ namespace CrazyHammer.Core.Input
             foreach (var index in _newGameTouches)
             {
                 var entity = _newGameTouches.GetEntity(index);
-                entity.Del<NewGameTouchComponent>();
+                
+                if (entity.Has<NewGameTouchComponent>())
+                {
+                    ref var newTouchComponent = ref entity.Get<NewGameTouchComponent>();
+                    if (newTouchComponent.ValidTicks > 0)
+                        newTouchComponent.ValidTicks--;
+                    else
+                        entity.Del<NewGameTouchComponent>();
+                }
                 
                 if (_leftTouches.IsEmpty())
                 {
