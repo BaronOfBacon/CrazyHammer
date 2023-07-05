@@ -42,7 +42,7 @@ namespace CrazyHammer.Core
                 {
                     handsComponent.InitialLocalPosition = handsComponent.DesiredPositionTransform.position 
                                                           - handsComponent.RootTransform.position;
-                    handsComponent.Velocity = Vector3.zero;
+                    handsComponent.SmoothDumpVelocity = Vector3.zero;
                 }
                 
                 Vector3 touchOffset = gameTouch.ScreenPosition - gameTouch.StartScreenPosition;
@@ -52,12 +52,15 @@ namespace CrazyHammer.Core
                 localPositionWithTouchOffset = Vector3.ClampMagnitude(localPositionWithTouchOffset, characterComponent.Settings.HandsSettings.MaxHandsDistance);
                 
                 var targetPosition = handsComponent.RootTransform.position + localPositionWithTouchOffset;
+                
                 float smoothDampTime = Mathf.Sqrt(characterComponent.Settings.HandsSettings.Mass);
                 var current = handsComponent.DesiredPositionTransform.position;
 
-                handsComponent.DesiredPositionTransform.position = Vector3.SmoothDamp(current, targetPosition, 
-                    ref handsComponent.Velocity, smoothDampTime, Mathf.Infinity, 
+                var smoothDampedPosition = Vector3.SmoothDamp(current, targetPosition,
+                    ref handsComponent.SmoothDumpVelocity, smoothDampTime, Mathf.Infinity,
                     characterComponent.Settings.HandsSettings.LerpSpeed);
+
+                handsComponent.DesiredPositionRB.MovePosition(smoothDampedPosition);
             }
         }
     }

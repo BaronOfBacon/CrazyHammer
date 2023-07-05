@@ -8,9 +8,12 @@ namespace CrazyHammer.Core
     {
         public Transform RootTransform;
         public Transform DesiredPositionTransform;
+        public Rigidbody DesiredPositionRB;
+        public Transform BackHandsBoundary;
+        public Transform LowHandsBoundary;
         [HideInInspector] 
         public Vector3 InitialLocalPosition;
         [HideInInspector] 
-        public Vector3 Velocity;
+        public Vector3 SmoothDumpVelocity;
     }
 }

@@ -22,11 +22,11 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   BodySettings:
-    sensitivity: 1
-    _mass: 1
+    sensitivity: 0.2
+    _mass: 3
     _lerpSpeed: 8
   HandsSettings:
-    _maxHandsDistance: 4
+    _maxHandsDistance: 2
     sensitivity: 1
-    _mass: 1
-    _lerpSpeed: 8
+    _mass: 0.1
+    _lerpSpeed: 10
