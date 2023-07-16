@@ -41,8 +41,9 @@ namespace CrazyHammer.Core.Input
             var entity = _world.NewEntity();
             ref var newTouch = ref entity.Get<GameTouchComponent>();
             newTouch.ID = finger.index;
-            newTouch.StartScreenPosition = Vector2.Scale(finger.currentTouch.startScreenPosition, _screenBasedTouchScaleRatio);
-            newTouch.ScreenPosition = Vector2.Scale(finger.currentTouch.startScreenPosition,_screenBasedTouchScaleRatio);
+            newTouch.StartScreenPosition = finger.currentTouch.startScreenPosition;
+            newTouch.DeltaPositionLastFrame = Vector3.zero;
+            newTouch.ScreenPosition = finger.currentTouch.startScreenPosition;
             ref var newTouchComponent = ref entity.Get<NewGameTouchComponent>();
             newTouchComponent.ValidTicks = 1;
         }
@@ -56,7 +57,8 @@ namespace CrazyHammer.Core.Input
                 ref var gameTouch = ref _gameTouches.Get1(index);
                 var fingerID = gameTouch.ID;
                 var finger = Touch.activeFingers.First(finger => finger.index == fingerID);
-                gameTouch.ScreenPosition = Vector2.Scale(finger.currentTouch.screenPosition,_screenBasedTouchScaleRatio);
+                gameTouch.DeltaPositionLastFrame = finger.currentTouch.screenPosition - gameTouch.ScreenPosition;
+                gameTouch.ScreenPosition = finger.currentTouch.screenPosition;
             } 
         }
 

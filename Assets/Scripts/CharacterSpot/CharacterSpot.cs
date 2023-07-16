@@ -10,7 +10,7 @@ namespace CrazyHammer.Core
     public struct CharacterSpot
     {
         [ShowInInspector]
-        public SplineContainer MovementSpline;
+        public SplineContainer SplineContainer;
         [ShowInInspector] 
         public SpotSide Side;
         [ShowInInspector]

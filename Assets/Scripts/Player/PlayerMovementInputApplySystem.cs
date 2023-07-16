@@ -59,7 +59,7 @@ namespace CrazyHammer.Core
                     ref movableComponent.Velocity, smoothDampTime, Mathf.Infinity, 
                     characterComponent.Settings.HandsSettings.LerpSpeed);
                 
-                var calculatedMovableComponent = MovableComponent.CalculateParams(spot.CurrentPosition, spot.MovementSpline);
+                var calculatedMovableComponent = MovableComponent.CalculateParams(spot.CurrentPosition, spot.SplineContainer);
                 
                 movableComponent = calculatedMovableComponent;
             }

@@ -1,6 +1,7 @@
 using CrazyHammer.Core.Input;
 using Leopotam.Ecs;
 using UnityEngine;
+using System.Linq;
 
 namespace CrazyHammer.Core
 {
@@ -20,7 +21,7 @@ namespace CrazyHammer.Core
 
                 EcsEntity touchEntity;
                 GameTouchComponent gameTouch;
-                
+
                 switch (spot.Side)
                 {
                     case SpotSide.Left when !_rightTouchFilter.IsEmpty():
@@ -34,34 +35,104 @@ namespace CrazyHammer.Core
                     default:
                         continue;
                 }
-                
+
                 ref var characterComponent = ref spot.CharacterEntity.Get<CharacterComponent>();
                 ref var handsComponent = ref spot.CharacterEntity.Get<HandsComponent>();
-                
-                if (touchEntity.Has<NewGameTouchComponent>())
+
+                var points = characterComponent.SplineComputer.GetPoints().Select(p => p.position).ToArray();
+
+                var touchOffset = gameTouch.DeltaPositionLastFrame * characterComponent.Settings.HandsSettings.Sensitivity *
+                                  Time.fixedDeltaTime;
+
+                var desiredPosition = handsComponent.DesiredPositionTransform.position + (Vector3)touchOffset;
+
+                if (IsPointInPolygon((Vector2)desiredPosition, points))
                 {
-                    handsComponent.InitialLocalPosition = handsComponent.DesiredPositionTransform.position 
-                                                          - handsComponent.RootTransform.position;
-                    handsComponent.SmoothDumpVelocity = Vector3.zero;
+                    handsComponent.DesiredPositionTransform.position = desiredPosition;
+                }
+                else
+                {
+                    var closestPoint = (Vector3)GetClosestPointOnBoundary((Vector2)desiredPosition, points);
+                    var direction = (desiredPosition - closestPoint).normalized;
+                    var newPosition = closestPoint + direction * 0.1f;
+
+                    handsComponent.DesiredPositionTransform.position = newPosition;
                 }
                 
-                Vector3 touchOffset = gameTouch.ScreenPosition - gameTouch.StartScreenPosition;
-                touchOffset *= characterComponent.Settings.HandsSettings.Sensitivity * Time.fixedDeltaTime;
-
-                var localPositionWithTouchOffset = handsComponent.InitialLocalPosition + touchOffset;
-                localPositionWithTouchOffset = Vector3.ClampMagnitude(localPositionWithTouchOffset, characterComponent.Settings.HandsSettings.MaxHandsDistance);
+                desiredPosition = handsComponent.DesiredPositionTransform.position;
                 
-                var targetPosition = handsComponent.RootTransform.position + localPositionWithTouchOffset;
-                
-                float smoothDampTime = Mathf.Sqrt(characterComponent.Settings.HandsSettings.Mass);
-                var current = handsComponent.DesiredPositionTransform.position;
+                var clampedPosition = ClampDistanceFromPoint(desiredPosition,
+                    handsComponent.RootTransform.position,
+                    characterComponent.Settings.HandsSettings.MaxHandsDistance);
 
-                var smoothDampedPosition = Vector3.SmoothDamp(current, targetPosition,
-                    ref handsComponent.SmoothDumpVelocity, smoothDampTime, Mathf.Infinity,
-                    characterComponent.Settings.HandsSettings.LerpSpeed);
-
-                handsComponent.DesiredPositionRB.MovePosition(smoothDampedPosition);
+                handsComponent.DesiredPositionTransform.position = clampedPosition;
             }
+        }
+
+        private Vector2 GetClosestPointOnBoundary(Vector2 point, Vector3[] polygonVertices)
+        {
+            Vector2 closestPoint = Vector2.zero;
+            float closestDistance = float.MaxValue;
+
+            for (int i = 0, j = polygonVertices.Length - 1; i < polygonVertices.Length; j = i++)
+            {
+                var edgeStart = polygonVertices[i];
+                var edgeEnd = polygonVertices[j];
+
+                var closest = GetClosestPointOnLineSegment(point, edgeStart, edgeEnd);
+                var distance = Vector2.Distance(point, closest);
+
+                if (distance < closestDistance)
+                {
+                    closestPoint = closest;
+                    closestDistance = distance;
+                }
+            }
+
+            return closestPoint;
+        }
+
+        private Vector2 GetClosestPointOnLineSegment(Vector2 point, Vector2 lineStart, Vector2 lineEnd)
+        {
+            var direction = lineEnd - lineStart;
+            var magnitudeSquared = direction.sqrMagnitude;
+
+            if (magnitudeSquared < Mathf.Epsilon)
+                return lineStart;
+
+            var t = Mathf.Clamp01(Vector2.Dot(point - lineStart, direction) / magnitudeSquared);
+            return lineStart + t * direction;
+        }
+
+        private bool IsPointInPolygon(Vector2 point, Vector3[] polygonVertices)
+        {
+            bool isInside = false;
+
+            for (int i = 0, j = polygonVertices.Length - 1; i < polygonVertices.Length; j = i++)
+            {
+                if ((polygonVertices[i].y > point.y) != (polygonVertices[j].y > point.y) &&
+                    (point.x < (polygonVertices[j].x - polygonVertices[i].x) * (point.y - polygonVertices[i].y) /
+                        (polygonVertices[j].y - polygonVertices[i].y) + polygonVertices[i].x))
+                {
+                    isInside = !isInside;
+                }
+            }
+
+            return isInside;
+        }
+
+        private Vector3 ClampDistanceFromPoint(Vector3 position, Vector3 exactPoint, float maxDistance)
+        {
+            var direction = position - exactPoint;
+            var distance = direction.magnitude;
+
+            if (distance > maxDistance)
+            {
+                var clampedDistance = Mathf.Clamp(distance, 0f, maxDistance);
+                var clampedPosition = exactPoint + direction.normalized * clampedDistance;
+                return clampedPosition;
+            }
+            return position;
         }
     }
 }

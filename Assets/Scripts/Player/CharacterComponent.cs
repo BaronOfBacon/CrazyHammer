@@ -1,5 +1,5 @@
 using System;
-using Sirenix.OdinInspector;
+using Dreamteck.Splines;
 using Sirenix.Serialization;
 
 namespace CrazyHammer.Core
@@ -9,5 +9,6 @@ namespace CrazyHammer.Core
     {
         [OdinSerialize]
         public CharacterSettings Settings;
+        public SplineComputer SplineComputer;
     }
 }

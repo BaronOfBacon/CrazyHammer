@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CrazyHammer.Core.Data
 {
@@ -12,24 +13,30 @@ namespace CrazyHammer.Core.Data
         }
         public float Sensitivity
         {
-            get => sensitivity;
+            get => _sensitivity;
         }
-        public float Mass
+        public float SmoothTime
         {
-            get => _mass;
+            get => _smoothTime;
         }
         public float LerpSpeed
         {
             get => _lerpSpeed;
         }
+        public LayerMask HandsBoundariesMask
+        {
+            get => _handsBoundariesMask;
+        }
         
         [SerializeField]
         private float _maxHandsDistance = 4f;
+        [FormerlySerializedAs("sensitivity")] [SerializeField]
+        private float _sensitivity = 1f;
         [SerializeField]
-        private float sensitivity = 1f;
-        [SerializeField]
-        private float _mass = 1f;
+        private float _smoothTime = 1f;
         [SerializeField]
         private float _lerpSpeed = 8f;
+        [SerializeField] 
+        private LayerMask _handsBoundariesMask;
     }
 }

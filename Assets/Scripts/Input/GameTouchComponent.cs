@@ -6,6 +6,7 @@ namespace CrazyHammer.Core.Input
     {
         public Vector2 StartScreenPosition;
         public Vector2 ScreenPosition;
+        public Vector2 DeltaPositionLastFrame;
         public int ID;
     }
 }

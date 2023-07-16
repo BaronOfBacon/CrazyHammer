@@ -17,9 +17,9 @@ namespace CrazyHammer.Core
                 if (spot.CharacterEntity.IsNull()) continue;
                 
                 ref var movableComponent = ref spot.CharacterEntity.Get<MovableComponent>();
-                ref var movementSplineContainer = ref spot.MovementSpline;
+                ref var movementSpline = ref spot.SplineContainer;
                 
-                movableComponent = MovableComponent.CalculateParams(0, movementSplineContainer);
+                movableComponent = MovableComponent.CalculateParams(0, movementSpline);
             }
         }
     }
