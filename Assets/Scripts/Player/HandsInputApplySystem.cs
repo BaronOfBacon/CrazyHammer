@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CrazyHammer.Core
 {
-    public class PlayerHandsInputApplySystem : IEcsRunSystem
+    public class HandsInputApplySystem : IEcsRunSystem
     {
         private readonly EcsFilter<CharacterSpot> _characterSpot = null;
         private readonly EcsFilter<LeftScreenSideTouchComponent> _leftTouchFilter = null;
@@ -44,11 +44,11 @@ namespace CrazyHammer.Core
                 var touchOffset = gameTouch.DeltaPositionLastFrame * characterComponent.Settings.HandsSettings.Sensitivity *
                                   Time.fixedDeltaTime;
 
-                var desiredPosition = handsComponent.DesiredPositionTransform.position + (Vector3)touchOffset;
+                var desiredPosition = handsComponent.LocalDesiredPositionTransform.position + (Vector3)touchOffset;
 
                 if (IsPointInPolygon((Vector2)desiredPosition, points))
                 {
-                    handsComponent.DesiredPositionTransform.position = desiredPosition;
+                    handsComponent.LocalDesiredPositionTransform.position = desiredPosition;
                 }
                 else
                 {
@@ -56,16 +56,23 @@ namespace CrazyHammer.Core
                     var direction = (desiredPosition - closestPoint).normalized;
                     var newPosition = closestPoint + direction * 0.1f;
 
-                    handsComponent.DesiredPositionTransform.position = newPosition;
+                    handsComponent.LocalDesiredPositionTransform.position = newPosition;
                 }
                 
-                desiredPosition = handsComponent.DesiredPositionTransform.position;
+                desiredPosition = handsComponent.LocalDesiredPositionTransform.position;
+                
+                var modelProvider = spot.CharacterEntity.Get<ModelComponent>();
+                
+                var handsTargetsOffset = modelProvider.Transform.position - modelProvider.Transform.parent.position;
                 
                 var clampedPosition = ClampDistanceFromPoint(desiredPosition,
-                    handsComponent.RootTransform.position,
+                    handsComponent.RootTransform.position - handsTargetsOffset,
                     characterComponent.Settings.HandsSettings.MaxHandsDistance);
 
-                handsComponent.DesiredPositionTransform.position = clampedPosition;
+                handsComponent.LocalDesiredPositionTransform.position = clampedPosition;
+                
+                handsComponent.DesiredPositionTransform.position =
+                    handsComponent.LocalDesiredPositionTransform.position + handsTargetsOffset;
             }
         }
 

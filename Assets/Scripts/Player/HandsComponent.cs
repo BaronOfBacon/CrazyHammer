@@ -8,8 +8,6 @@ namespace CrazyHammer.Core
     {
         public Transform RootTransform;
         public Transform DesiredPositionTransform;
-        [HideInInspector] 
-        public Vector3 SmoothDumpVelocity;
-
+        public Transform LocalDesiredPositionTransform;
     }
 }

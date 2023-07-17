@@ -21,16 +21,5 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  MovementSensitivity: 0.0011
-  BodySettings:
-    sensitivity: 0.05
-    _mass: 1
-    _lerpSpeed: 8
-  HandsSettings:
-    _maxHandsDistance: 2
-    sensitivity: 0.5
-    _mass: 1
-    _lerpSpeed: 0.4
   TargetScreenRatio: {x: 1920, y: 1080}
-  PlayerFakeInitSide: 0
-  MouseSensitivity: 0.85
+  PlayerFakeInitSide: 1

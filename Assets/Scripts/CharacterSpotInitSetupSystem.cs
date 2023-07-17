@@ -20,6 +20,13 @@ namespace CrazyHammer.Core
                 ref var movementSpline = ref spot.SplineContainer;
                 
                 movableComponent = MovableComponent.CalculateParams(0, movementSpline);
+                
+                ref var characterComponent = ref spot.CharacterEntity.Get<CharacterComponent>();
+                
+                characterComponent.RootTransform.position = movableComponent.Position;
+                characterComponent.RootTransform.forward = movableComponent.ForwardDirection;
+                characterComponent.SplineComputer.RebuildImmediate();
+                characterComponent.SplineMesh.Rebuild();
             }
         }
     }

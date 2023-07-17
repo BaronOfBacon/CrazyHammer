@@ -1,6 +1,8 @@
 using System;
 using Dreamteck.Splines;
 using Sirenix.Serialization;
+using UnityEngine;
+using SplineMesh = Dreamteck.Splines.SplineMesh;
 
 namespace CrazyHammer.Core
 {
@@ -10,5 +12,7 @@ namespace CrazyHammer.Core
         [OdinSerialize]
         public CharacterSettings Settings;
         public SplineComputer SplineComputer;
+        public SplineMesh SplineMesh;
+        public Transform RootTransform;
     }
 }
